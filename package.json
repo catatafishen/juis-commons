@@ -1,0 +1,18 @@
+{
+  "name": "juis-commons",
+  "version": "1.0.2",
+  "description": "Functionality that is shared by other juis modules. Can also be used on application level.",
+  "exports": {
+    "./Listenable.js": "./src/Listenable.js",
+    "./JuiSUtils.js": "./src/JuisUtils.js"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "ava"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ava": "^3.15.0"
+  }
+}
