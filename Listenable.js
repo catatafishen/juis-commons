@@ -1,4 +1,4 @@
-import JuisUtils, {removeByValue} from "./JuisUtils.js";
+import {arrayWrap, removeByValue} from "./JuisUtils.js";
 
 const createListener = function (listenable, listensTo, handler, once) {
     let listener = new Listener(listensTo, handler, listenable, once);
@@ -24,7 +24,7 @@ const firePersistingEvents = function (listenable, listensTo) {
 
 const Listener = function (listensTo, handler, thisListenable, once) {
     let autoResume = false;
-    this.listensTo = JuisUtils.arrayWrap(listensTo);
+    this.listensTo = arrayWrap(listensTo);
     this.active = true;
     this.pause = () => this.active = false;
     this.pauseOnce = () => {

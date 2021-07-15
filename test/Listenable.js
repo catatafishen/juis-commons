@@ -1,5 +1,5 @@
 import test from "ava";
-import Listenable from "../src/Listenable.js";
+import Listenable from "../Listenable.js";
 
 const EVENT = "myEvent";
 const EVENT_2 = "myEvent2";

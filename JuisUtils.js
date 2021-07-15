@@ -1,16 +1,14 @@
-export default {
-    arrayWrap: (values) => {
-        if (!Array.isArray(values)) {
-            if (values === undefined) {
-                values = [];
-            } else {
-                values = [values];
-            }
+const arrayWrap = (values) => {
+    if (!Array.isArray(values)) {
+        if (values === undefined) {
+            values = [];
+        } else {
+            values = [values];
         }
-        return values;
-    },
-    camelCaseToDash: text => text.replace(/([A-Z])/g, $1 => "-" + $1.toLowerCase())
-};
+    }
+    return values;
+}
+const camelCaseToDash = text => text.replace(/([A-Z])/g, $1 => "-" + $1.toLowerCase())
 
 function sortByMappedValue(mapper) {
     return (a, b) => {
@@ -32,5 +30,7 @@ function removeByValue(array, item) {
     return array;
 }
 
+export {camelCaseToDash}
+export {arrayWrap}
 export {removeByValue};
 export {sortByMappedValue};
