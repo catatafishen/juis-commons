@@ -1,6 +1,22 @@
 import {arrayWrap, removeByValue} from "./JuisUtils.js";
 
-const createListener = function (listenable, listensTo, handler, once) {
+/**
+ * @callback eventHandler
+ * @param Payload {any}
+ * @param Event {Event}
+ *
+ */
+
+
+/**
+ *
+ * @param listenable {Listenable}
+ * @param listensTo {string}
+ * @param handler {eventHandler}
+ * @param once {boolean}
+ * @returns {Listener}
+ */
+const createListener = function (listenable, listensTo, handler, once = false) {
     let listener = new Listener(listensTo, handler, listenable, once);
     if (!listenable[idKey]) {
         listenable[idKey] = Symbol();
@@ -22,7 +38,15 @@ const firePersistingEvents = function (listenable, listensTo) {
     }
 };
 
-const Listener = function (listensTo, handler, thisListenable, once) {
+/**
+ *
+ * @param listensTo {string}
+ * @param handler {eventHandler}
+ * @param thisListenable {Listenable}
+ * @param once
+ * @constructor
+ */
+const Listener = function (listensTo, handler, thisListenable, once = false) {
     let autoResume = false;
     this.listensTo = arrayWrap(listensTo);
     this.active = true;
@@ -66,6 +90,13 @@ const Listener = function (listensTo, handler, thisListenable, once) {
     };
 };
 
+/**
+ *
+ * @param type
+ * @param data
+ * @param eventProperties
+ * @constructor
+ */
 const Event = function (type, data, eventProperties) {
     let next;
     let propagationPath = [eventProperties.origin];
@@ -111,12 +142,20 @@ const Event = function (type, data, eventProperties) {
 
 const listeners = new Map(); // ListanableId -> [listeners]
 const idKey = Symbol();
+/**
+ * @mixin Listenable
+ */
 export default function () {
-    this.fire = function (event, local) {
+    /**
+     *
+     * @param event {Event}
+     * @param local {boolean}
+     */
+    this.fire = function (event, local = false) {
         if (this[idKey] && listeners.has(this[idKey])) {
             [...listeners.get(this[idKey])].forEach((listener) => {
                 if (!event.isResolved()) {
-                    return listener.handle(event);
+                    listener.handle(event);
                 }
             });
         }
@@ -136,6 +175,12 @@ export default function () {
         this.trigger = (...triggerArgs) => origin.trigger.apply(origin, triggerArgs);
     };
 
+    /**
+     *
+     * @param listensTo {string}
+     * @param handler {eventHandler}
+     * @returns {Listener}
+     */
     this.on = function (listensTo, handler) {
         return createListener(this, listensTo, handler);
     };
@@ -167,12 +212,27 @@ export default function () {
             properties = {...properties, resolve, reject};
             this.trigger(type, data, properties);
         });
-    }
+    };
 
     this.removeAllListeners = function () {
         listeners.delete(this[idKey]);
-    }
+    };
 
+    /**
+     * The complete Triforce, or one or more components of the Triforce.
+     * @typedef {Object} EventProperties
+     * @property {Listenable} [origin]
+     * @property {boolean} [propagating]
+     * @property {boolean} [persistent]
+     * @property {boolean} [skipOrigin]
+     */
+
+    /**
+     *
+     * @param type {string}
+     * @param data {any}
+     * @param properties {EventProperties}
+     */
     this.trigger = function (type, data, properties = {}) {
         properties = {origin: this, propagating: true, persistent: false, ...properties};
         let event = new Event(type, data, properties);
@@ -184,6 +244,10 @@ export default function () {
         }
     };
 
+    /**
+     *
+     * @param events {[string]|string}
+     */
     this.dontPropagate = function (events) {
         if (!Array.isArray(events)) {
             events = [events];
@@ -191,4 +255,4 @@ export default function () {
         events.forEach(eventName => this.on(eventName, (ignore, event) => event.stopPropagation()));
     }
     this.nextListenable = undefined;
-};
+}
