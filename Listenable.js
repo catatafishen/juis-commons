@@ -150,7 +150,7 @@ const Event = function (type, data, eventProperties) {
         }
         this.stopPropagation();
         resolved = true;
-    }
+    };
     this.isResolved = () => resolved;
     this.isResolvable = () => !!eventProperties.resolve;
 
@@ -204,7 +204,7 @@ export default function () {
 
     /**
      *
-     * @param listensTo {string}
+     * @param listensTo {string|Symbol}
      * @param handler {eventHandler}
      * @returns {Listener}
      */
@@ -224,7 +224,7 @@ export default function () {
         });
         redirectListener.redirect(listener);
         return redirectListener;
-    }
+    };
 
     this.when = function (listensTo) {
         return new Promise(resolve => this.listenOnce(listensTo, resolve));
@@ -256,7 +256,7 @@ export default function () {
 
     /**
      *
-     * @param type {string}
+     * @param type {string|Symbol}
      * @param data {any}
      * @param properties {EventProperties}
      */
