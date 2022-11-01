@@ -202,10 +202,6 @@ export default function () {
         }
     };
 
-    this.setEventOrigin = function (origin) {
-        this.trigger = (...triggerArgs) => origin.trigger.apply(origin, triggerArgs);
-    };
-
     /**
      *
      * @param listensTo {string}
@@ -284,6 +280,14 @@ export default function () {
             events = [events];
         }
         events.forEach(eventName => this.on(eventName, (ignore, event) => event.stopPropagation()));
-    }
+    };
+
+    /**
+     *
+     * @param origin {Listenable}
+     */
+    this.setEventOrigin = function (origin) {
+        this.trigger = (...triggerArgs) => origin.trigger.apply(origin, triggerArgs);
+    };
     this.nextListenable = undefined;
 }
