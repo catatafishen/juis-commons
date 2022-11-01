@@ -7,6 +7,13 @@ import {arrayWrap, removeByValue} from "./JuisUtils.js";
  *
  */
 
+/**
+ * @callback eventHandlerFilter
+ * @param Payload {any}
+ * @param Event {Event}
+ * @returns boolean
+ */
+
 
 /**
  *
@@ -48,19 +55,40 @@ const firePersistingEvents = function (listenable, listensTo) {
  */
 const Listener = function (listensTo, handler, thisListenable, once = false) {
     let autoResume = false;
+    let filters = [];
     this.listensTo = arrayWrap(listensTo);
     this.active = true;
     this.pause = () => this.active = false;
     this.pauseOnce = () => {
         this.active = false;
         autoResume = true;
-    }
+    };
     this.resume = () => {
         this.active = true;
         autoResume = false;
     };
     let redirectTo;
     this.redirect = (listener) => redirectTo = listener;
+
+    /**
+     *
+     * @param newHandler {eventHandler}
+     * @returns {Listener}
+     */
+    this.do = (newHandler) => {
+        handler = newHandler;
+        return this;
+    };
+
+    /**
+     *
+     * @param filter {eventHandlerFilter}
+     * @returns {Listener}
+     */
+    this.filter = (filter) => {
+        filters.push(filter);
+        return this;
+    };
 
     this.handle = (event) => {
         if (!this.listensTo.includes(event.getType())) {
@@ -74,6 +102,9 @@ const Listener = function (listensTo, handler, thisListenable, once = false) {
             if (autoResume) {
                 this.resume();
             }
+            return;
+        }
+        if (!filters.every(filter => filter.call(thisListenable, event.getData(), event))) {
             return;
         }
         let returnValue = handler.call(thisListenable, event.getData(), event);
