@@ -1,19 +1,28 @@
 {
   "name": "juis-commons",
-  "version": "1.0.12",
-  "description": "Functionality that is shared by other juis modules. Can also be used on application level.",
-  "exports": {
-    "./Listenable.js": "./Listenable.js",
-    "./JuisUtils.js": "./JuisUtils.js",
-    "./Errors.js": "./Errors.js"
-  },
+  "version": "2.0.0",
+  "description": "JuiS framework",
   "type": "module",
   "scripts": {
+    "build": "tsc",
+    "watch": "tsc-watch",
     "test": "ava"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "ava": "4.3.0"
+    "@ava/typescript": "^3.0.1",
+    "@tsconfig/recommended": "^1.0.1",
+    "ava": "4.3.0",
+    "tsc-watch": "5.0.3",
+    "typescript": "4.8.4"
+  },
+  "ava": {
+    "typescript": {
+      "rewritePaths": {
+        "src/": "lib/"
+      },
+      "compile": false
+    }
   }
 }

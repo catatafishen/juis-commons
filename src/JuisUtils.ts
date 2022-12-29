@@ -1,4 +1,4 @@
-const arrayWrap = (values) => {
+const arrayWrap = <T>(values?: T | T[]): T[] => {
     if (!Array.isArray(values)) {
         if (values === undefined) {
             values = [];
@@ -8,10 +8,10 @@ const arrayWrap = (values) => {
     }
     return values;
 }
-const camelCaseToDash = text => text.replace(/([A-Z])/g, $1 => "-" + $1.toLowerCase())
+const camelCaseToDash = (text: string) => text.replace(/([A-Z])/g, $1 => "-" + $1.toLowerCase())
 
-function sortByMappedValue(mapper) {
-    return (a, b) => {
+function sortByMappedValue<InputType, OutputType>(mapper: (inputType: InputType) => OutputType) {
+    return (a: InputType, b: InputType) => {
         const mappedA = mapper(a);
         const mappedB = mapper(b);
         if (mappedA < mappedB) {
@@ -24,7 +24,7 @@ function sortByMappedValue(mapper) {
     }
 }
 
-function removeByValue(array, item) {
+function removeByValue<T>(array: T[], item: T) {
     let index = array.indexOf(item);
     if (index !== -1) array.splice(index, 1);
     return array;
