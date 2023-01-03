@@ -24,6 +24,10 @@ class Model extends Listenable {
     #savedProperties: Record<string, any> = {};
     #unsavedProperties: Record<string, any> = {};
 
+    hasUnsavedProperties = () => {
+        return Object.keys(this.#unsavedProperties).length > 0;
+    };
+
     #getFieldSetter = <T extends Model>(name: string, fieldProperties: FieldProperties<any>) => {
         return (newValue: any) => {
             const oldValue = this.getPropertyValue(name);
