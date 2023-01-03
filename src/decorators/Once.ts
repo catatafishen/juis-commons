@@ -17,9 +17,9 @@ const once = <T>(
     };
 };
 
-const onceCallback = <T>(fn: (arg: any) => T) => {
-    let values: Map<any, T> = new Map();
-    return function (arg: any) {
+const onceCallback = <T, R>(fn: (arg: T) => R) => {
+    let values: Map<any, R> = new Map();
+    return function (arg: T) {
         if (!values.has(arg)) {
             values.set(arg, fn(arg));
         }
