@@ -2,13 +2,13 @@ import Model from "./Model.js";
 import RestServerInterface from "../restserver/RestServerInterface.js";
 import {getConstructor, getRestResourcePropertiesForClass} from "./resourceDecorator.js";
 import jsonMapper from "./json-mappers/jsonMapper.js";
-import {getFields} from "./fieldDecorator.js";
+import {FieldProperties, getFields, getFieldsForModel, ModelFieldProperties} from "./fieldDecorator.js";
 import Optional from "../Optional.js";
 import throttle from "../decorators/Throttle.js";
 import {onceCallback} from "../decorators/Once.js";
 
-const getModelMapper = onceCallback(<T extends RestResource>(modelName: string): jsonMapper<T> => {
-    const model = getConstructor(modelName);
+const getModelMapper = onceCallback(<T extends RestResource>(fieldProperties: ModelFieldProperties<T>): jsonMapper<T> => {
+    const model = getConstructor(fieldProperties.modelType);
     return {
         fromJson: (rawValue: Record<string, any> | number | string, owner) => {
             if (typeof rawValue === "number" || typeof rawValue === "string") {
@@ -22,12 +22,16 @@ const getModelMapper = onceCallback(<T extends RestResource>(modelName: string):
             return entity as T;
         },
         toJson(value: T, owner: Model) {
-            return value.getUnsavedRawData();
+            if (fieldProperties.cascading && value.hasUnsavedProperties()) {
+                return value.getUnsavedRawData();
+            } else {
+                return value.id;
+            }
         }
     };
 });
-const getModelListMapper = onceCallback(<T extends RestResource>(modelName: string): jsonMapper<T[]> => {
-    const model = getConstructor(modelName);
+const getModelListMapper = onceCallback(<T extends RestResource>(fieldProperties: ModelFieldProperties<T>): jsonMapper<T[]> => {
+    const model = getConstructor(fieldProperties.modelType);
     return {
         fromJson: (rawValues: (Record<string, any> | number | string)[], owner) => {
             return rawValues.map(rawValue => {
@@ -43,7 +47,17 @@ const getModelListMapper = onceCallback(<T extends RestResource>(modelName: stri
             });
         },
         toJson(value: T[], owner: Model) {
-            return value.map(entity => entity.getUnsavedRawData());
+            if (fieldProperties.cascading) {
+                return value.map(entity => {
+                    if (entity.hasUnsavedProperties()) {
+                        return entity.getUnsavedRawData();
+                    } else {
+                        return entity.id;
+                    }
+                });
+            } else {
+                return value.filter(entity => entity.id).map(entity => entity.id);
+            }
         }
     };
 });
@@ -70,7 +84,7 @@ abstract class RestResource extends Model {
             }
             const modelType = prop.modelType;
             if (modelType) {
-                this.#jsonMappers[name] = prop.modelList ? getModelListMapper(modelType) : getModelMapper(modelType);
+                this.#jsonMappers[name] = prop.modelList ? getModelListMapper(prop as ModelFieldProperties<this>) : getModelMapper(prop as ModelFieldProperties<this>);
             }
         });
     }

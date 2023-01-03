@@ -40,6 +40,7 @@ type FieldProperties<T> = {
     label?: string
     jsonMapper?: jsonMapper<T>
     tableCellFactory?: <M extends RestResource>(value: T, entity: M, fieldProperties: FieldProperties<T>) => Component,
+    name: string
     // modelList: never,
     // modelType: never,
     // cascading: never,
@@ -48,7 +49,7 @@ type FieldProperties<T> = {
     // backReference: never,
 }
 
-const fieldCallback = <TValue, TProps>(fieldProperties?: FieldProperties<TProps>) => {
+const fieldCallback = <TValue, TProps>(fieldProperties: Omit<FieldProperties<TProps>, "name"> = {}) => {
     return <T extends Model & { [KA in TKey]?: TValue }, TKey extends keyof T>(
         target: Pick<T, TKey>,
         name: TKey & string
@@ -57,19 +58,19 @@ const fieldCallback = <TValue, TProps>(fieldProperties?: FieldProperties<TProps>
         if (!fields.has(model)) {
             fields.set(model, {});
         }
-        fields.get(model)![name] = fieldProperties || {};
+        fields.get(model)![name] = {name, ...fieldProperties};
     };
 };
 
-function field<TValue>(fieldProperties?: FieldProperties<TValue>) {
+function field<TValue>(fieldProperties?: Omit<FieldProperties<TValue>, "name">) {
     return fieldCallback<TValue, TValue>(fieldProperties);
 }
 
-function modelField<TValue extends RestResource>(fieldProperties: ModelFieldProperties<TValue>) {
+function modelField<TValue extends RestResource>(fieldProperties: Omit<ModelFieldProperties<TValue>, "name">) {
     return fieldCallback<TValue, TValue>(fieldProperties);
 }
 
-function modelListField<TValue extends RestResource>(fieldProperties: ModelFieldProperties<TValue>) {
+function modelListField<TValue extends RestResource>(fieldProperties: Omit<ModelFieldProperties<TValue>, "name">) {
     fieldProperties.modelList = true;
     return fieldCallback<TValue[], TValue>(fieldProperties);
 }
@@ -83,4 +84,12 @@ class ChangeEvent {
 }
 
 
-export {field as default, modelField, modelListField, FieldProperties, ModelFieldProperties, getFields};
+export {
+    field as default,
+    modelField,
+    modelListField,
+    FieldProperties,
+    ModelFieldProperties,
+    getFields,
+    getFieldsForModel
+};
