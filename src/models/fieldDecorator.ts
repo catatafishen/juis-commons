@@ -17,15 +17,15 @@ const getFields = <T extends Model>(instance: T) => {
     });
     return foundFields;
 };
-// const getFieldsForModel = <T extends typeof Model>(model: T) => {
-//     let foundFields: Record<string, FieldProperties<any>> = {};
-//     fields.forEach((value, key) => {
-//         if (model === key || model.prototype instanceof key) {
-//             foundFields = {...foundFields, ...value};
-//         }
-//     });
-//     return foundFields;
-// };
+const getFieldsForModel = <T extends typeof Model>(model: T) => {
+    let foundFields: Record<string, FieldProperties<any> & Partial<ModelFieldProperties<any>>> = {};
+    fields.forEach((value, key) => {
+        if (model === key || model.prototype instanceof key) {
+            foundFields = {...foundFields, ...value};
+        }
+    });
+    return foundFields;
+};
 
 
 type ModelFieldProperties<T extends RestResource> = FieldProperties<T> & {

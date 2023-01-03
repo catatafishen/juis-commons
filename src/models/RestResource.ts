@@ -6,6 +6,7 @@ import {FieldProperties, getFields, getFieldsForModel, ModelFieldProperties} fro
 import Optional from "../Optional.js";
 import throttle from "../decorators/Throttle.js";
 import {onceCallback} from "../decorators/Once.js";
+import Query from "./Query.js";
 
 const getModelMapper = onceCallback(<T extends RestResource>(fieldProperties: ModelFieldProperties<T>): jsonMapper<T> => {
     const model = getConstructor(fieldProperties.modelType);
@@ -186,6 +187,13 @@ abstract class RestResource extends Model {
         }
         return entity.refreshFromServer();
     };
+    static query = function <T extends RestResource>(this: Pick<typeof RestResource, keyof typeof RestResource> & (new() => T)) {
+        return new Query(this);
+    };
+
+    static fields = function <T extends RestResource, fields extends Omit<T, keyof RestResource>>(this: Pick<typeof RestResource, keyof typeof RestResource> & (new() => T)) {
+        return getFieldsForModel(this) as { [key in keyof fields]: FieldProperties<T> };
+    };
 
     @throttle()
     refreshFromServer() {
@@ -207,6 +215,17 @@ abstract class RestResource extends Model {
 
     static #staticServer: RestServerInterface;
     static setServer = (server: RestServerInterface) => RestResource.#staticServer = server;
+    getValue = (qualifiedName: any): any => {
+        if (typeof qualifiedName !== "string") {
+            return this[qualifiedName as keyof this];
+        }
+        const indexOfFirstDot = qualifiedName.indexOf(".");
+        if (indexOfFirstDot > 0) {
+            let member = this[qualifiedName.substring(0, indexOfFirstDot) as keyof this] as RestResource;
+            return member.getValue(qualifiedName.substring(indexOfFirstDot + 1));
+        }
+        return this[qualifiedName as keyof this];
+    };
 }
 
 export default RestResource;
