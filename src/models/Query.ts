@@ -8,32 +8,23 @@ type StringKeysOf<T> = Extract<keyof T, string>
 
 type Join<P extends string, K extends string> = P extends "" ? K : `${P}.${K}`;
 
-type KeyValueTypeOld<T, D extends number = 2, P extends string = ""> = [D] extends [never] ? never : {
-    [K in keyof Omit<T, keyof RestResource>]-?: K extends keyof pickResourceFields<T> ?
-        K extends string ? [K, Required<T>[K]] | KeyValueTypeOld<T[K], Prev[D], K> : never
-        : K extends string ? [Join<P, K>, Required<T>[K]] : never
-}[keyof Omit<T, keyof RestResource>]
+type KeyValueType<T extends RestResource, Types = any, D extends number = 2, P extends string = ""> = KeyValueTypeInner<FieldsType<T>, Types, D, P>;
+type KeyValueTypeInner<T extends Record<string, any>, Types = any, D extends number = 2, P extends string = ""> = [D] extends [never] ? never : {
+    [K in keyof T]-?: K extends string ?
+        (Required<T>[K] extends Types ? [Join<P, K>, Required<T>[K]] : never)
+        |
+        (T[K] extends RestResource | RestResource[] ? KeyValueType<Unpacked<T[K]>, Types, Prev[D], Join<P, K>> : never)
+        : never
+}[keyof T]
 
-type KeyValueType2<T, Types = any, D extends number = 2, P extends string = ""> = [D] extends [never] ? never : T extends Object ? {
-    [K in StringKeysOf<Omit<T, keyof RestResource>>]-?: K extends keyof pickResourceFields<T> ?
-        [Required<T>[K] extends Types ? K : never, Required<T>[K]] | KeyValueType2<T[K], Types, Prev[D], K> : Required<T>[K] extends Types ? [Join<P, K>, Required<T>[K]] : never
-}[StringKeysOf<Omit<T, keyof RestResource>>] : never
-
-
-type KeyValueType<T, Types = any, D extends number = 2, P extends string = ""> = [D] extends [never] ? never : T extends Object ? {
-    [K in StringKeysOf<Omit<T, keyof RestResource>>]-?: K extends keyof pickResourceFields<T> ?
-        (Required<T>[K] extends Types ? [Join<P, K>, Required<T>[K]] : never) | KeyValueType<T[K], Types, Prev[D], K> :
-        Required<T>[K] extends Types ? [Join<P, K>, Required<T>[K]] : never
-}[StringKeysOf<Omit<T, keyof RestResource>>] : never
-
+type FieldsType<T extends RestResource> = {
+    [K in StringKeysOf<Omit<T, keyof RestResource>>]: Required<T>[K]
+}
+type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Prev = [never, 0, 1, 2, 3, 4, ...0[]];
 
-type PickByType<T, Value> = {
-    [P in keyof T as T[P] extends Value | undefined ? P : never]: T[P]
-}
-type pickResourceFields<T> = PickByType<Omit<T, StringKeysOf<RestResource>>, RestResource>
+class Query<Model extends typeof RestResource, Instance extends InstanceType<Model>> {
 
-class Query<Model extends typeof RestResource, Instance extends Omit<InstanceType<Model>, keyof RestResource>> {
     #model;
     #props;
 
