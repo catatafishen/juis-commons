@@ -17,7 +17,7 @@ const getFields = <T extends Model>(instance: T) => {
     });
     return foundFields;
 };
-const getFieldsForModel = <T extends typeof Model>(model: T) => {
+const getFieldsForModel = <T extends typeof RestResource>(model: (T) | (new () => InstanceType<T>)) => {
     let foundFields: Record<string, FieldProperties<any> & Partial<ModelFieldProperties<any>>> = {};
     fields.forEach((value, key) => {
         if (model === key || model.prototype instanceof key) {

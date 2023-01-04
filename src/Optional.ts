@@ -41,7 +41,7 @@ export default class Optional<T> {
         if (this.#value !== undefined && this.#value !== null) {
             return this.#value!;
         } else {
-            throw error;
+            throw error();
         }
     };
     map = <U>(callback: (value: T) => U): Optional<U> => {

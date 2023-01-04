@@ -2,7 +2,7 @@ import Model from "../Model.js";
 
 type jsonMapper<T> = {
     fromJson(value: string | number | boolean | undefined | Record<string, any>, entity: Model): T | undefined;
-    toJson(value: T, entity: Model): string | number | boolean | undefined | Record<string, any>;
+    toJson(value: T, entity: Model | null): string | number | boolean | undefined | Record<string, any>;
 };
 
 const isoStringToDate: jsonMapper<Date> = {

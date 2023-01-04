@@ -49,7 +49,7 @@ function restResource(properties: RestResourceProperties<any>) {
 }
 
 const getConstructor = (name: string): typeof RestResource => {
-    return Optional.of(modelsPerName[name]).orElseThrow(() => new Error(`No such model: ${name}`));
+    return Optional.of(modelsPerName[name]).orElseThrow(() => new Error(`Could not find model "${name}". Did you remember to decorate the class as a @restResource?`));
 };
 
 export {restResource as default, getRestResourcePropertiesForClass, setDefaultCacheOptions, getConstructor};

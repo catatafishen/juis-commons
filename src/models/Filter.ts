@@ -119,7 +119,6 @@ class Filter<T extends RestResource> extends AbstractFilter<T> {
         this.#test = test;
     }
 
-
     getSimpleObj = () => {
         return {f1: this.#field, o: this.#operator, v: this.#value};
     };
@@ -132,4 +131,4 @@ class Filter<T extends RestResource> extends AbstractFilter<T> {
     };
 }
 
-export {Filter, FilterJunction, AbstractFilter};
+export {Filter, FilterJunction, AbstractFilter, FilterOperator, Predicate};
