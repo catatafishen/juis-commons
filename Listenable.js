@@ -67,6 +67,14 @@ const Listener = function (listensTo, handler, thisListenable, once = false) {
         this.active = true;
         autoResume = false;
     };
+    this.dontListenWhile = (action) => {
+        this.pause();
+        try {
+            return action();
+        } finally {
+            this.resume();
+        }
+    };
     let redirectTo;
     this.redirect = (listener) => redirectTo = listener;
 
